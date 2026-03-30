@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Lista TODO</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: #f0f0f0;
+            padding: 20px;
+        }
+
+        .box {
+            background: white;
+            padding: 20px;
+            max-width: 500px;
+            margin: auto;
+            border-radius: 10px;
+        }
+
+        input {
+            padding: 8px;
+            width: 70%;
+        }
+
+        button {
+            padding: 8px;
+            margin: 2px;
+            cursor: pointer;
+        }
+
+        li {
+            list-style: none;
+            padding: 5px;
+            margin: 5px 0;
+            border-bottom: 1px solid #ccc;
+        }
+
+        .done {
+            text-decoration: line-through;
+            color: gray;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Lista zadań TODO</h2>
+
+    <input type="text" id="taskInput" placeholder="Wpisz zadanie">
+    <button onclick="addTask()">Dodaj</button>
+
+    <br><br>
+
+    <button onclick="setFilter('all')">Wszystkie</button>
+    <button onclick="setFilter('active')">Aktywne</button>
+    <button onclick="setFilter('done')">Wykonane</button>
+
+    <ul id="taskList"></ul>
+</div>
+
+<script>
+let tasks = JSON.parse(localStorage.getItem("tasks")) || [];
+let filter = "all";
+
+function saveTasks() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
+function addTask() {
+    let input = document.getElementById("taskInput");
+    let text = input.value;
+
+    if (text === "") return;
+
+    tasks.push({
+        text: text,
+        done: false
+    });
+
+    input.value = "";
+    saveTasks();
+    renderTasks();
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    renderTasks();
+}
+
+function toggleTask(index) {
+    tasks[index].done = !tasks[index].done;
+    saveTasks();
+    renderTasks();
+}
+
+function setFilter(f) {
+    filter = f;
+    renderTasks();
+}
+
+function renderTasks() {
+    let list = document.getElementById("taskList");
+    list.innerHTML = "";
+
+    for (let i = 0; i < tasks.length; i++) {
+
+        if (filter === "active" && tasks[i].done) continue;
+        if (filter === "done" && !tasks[i].done) continue;
+
+        let li = document.createElement("li");
+
+        let span = document.createElement("span");
+        span.innerText = tasks[i].text;
+        if (tasks[i].done) span.classList.add("done");
+        span.onclick = function() {
+            toggleTask(i);
+        };
+
+        let delBtn = document.createElement("button");
+        delBtn.innerText = "Usuń";
+        delBtn.onclick = function() {
+            deleteTask(i);
+        };
+
+        li.appendChild(span);
+        li.appendChild(delBtn);
+        list.appendChild(li);
+    }
+}
+
+renderTasks();
+</script>
+
+</body>
+</html>
